@@ -1,0 +1,45 @@
+{
+  "name": "spotiflake-exe",
+  "version": "1.0.0",
+  "description": "",
+  "bin": "index.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pkg -t node14-win-x64 index.js",
+    "build": "nexe"
+  }, 
+  
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@octokit/auth-basic": "^1.4.8",
+    "@octokit/rest": "^18.12.0",
+    "axios": "^0.24.0",
+    "chalk": "^4.0.0",
+    "clear": "^0.1.0",
+    "clui": "^0.3.6",
+    "conf": "^10.1.1",
+    "configstore": "^6.0.0",
+    "figlet": "^1.5.2",
+    "inquirer": "^8.2.0",
+    "lodash": "^4.17.21",
+    "meow": "^3.7.0",
+    "minimist": "^1.2.5",
+    "ora": "^1.1.0",
+    "simple-git": "^2.48.0",
+    "touch": "^3.1.0"
+  },
+  "pkg": {
+    "scripts": "lib/*.js",
+    "assets": [ "node_modules/figletfonts/Standard.flf", "node_modules/figlet/fonts/Ghost.flf" ],
+    "targets": [
+      "node12-linux-x64",
+      "node12-macos-x64",
+      "node12-win-x86"
+	],
+     "outputPath": "dist"
+   
+  }
+}
