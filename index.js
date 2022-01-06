@@ -1,32 +1,68 @@
-#!/usr/bin/env node
-
 'use strict';
-const meow = require('meow');
 const chalk = require('chalk');
+const clear = require('clear');
+const figlet = require('figlet');
+const files = require('./lib/files');
+const inquirer  = require('inquirer');
+const CLI = require('clui');
+const Spinner = CLI.Spinner;
 const ora = require('ora');
-const inquirer = require('inquirer');
-const Conf = require('conf');
-const updateNotifier = require('update-notifier');
+const status = ora('Loading ...');
+const spotifyApi = require('./lib/spotify.js')
 const pkg = require('./package.json');
-const spinner = ora('Loading ...');
+const meow = require('meow');
 
-// config file stored in /Users/{home}/Library/Preferences/{project-name}
+const Conf = require('conf');
 const config = new Conf();
-const spotifyApi = require('./api_calls/requests')
+
+clear();
+
+console.log(
+  chalk.yellow(
+    figlet.textSync('Spotiflake', { horizontalLayout: 'full' })
+  )
+);
 
 function auth() {
    return new Promise((resolve, reject) => {
-      inquirer.prompt([{
-            type: 'input',
-            message: 'Enter your Spotify username',
-            name: 'username'
-         },
-         {
-            type: 'password',
-            message: 'Enter your Spotify bearer token',
-            name: 'bearer'
-         }
-      ]).then(function(answers) {
+    inquirer.prompt([
+      {
+        name: 'artist',
+        type: 'input',
+        message: 'Enter an artist name:',
+        validate: function( value ) {
+          if (value.length) {
+            return true;
+          } else {
+            return 'Please enter a valid artist name, for example: Twice';
+          }
+        }
+      },
+      {
+        name: 'username',
+        type: 'input',
+        message: 'Enter your Spotify username:',
+        validate: function( value ) {
+          if (value.length) {
+            return true;
+          } else {
+            return 'Please enter a correct Spotify username. To get your username, just copy the word inside the Your Username box : https://open.spotify.com/user/[Your Username]';
+          }
+        }
+      },
+      {
+        name: 'password',
+        type: 'password',
+        message: 'Enter your Spotify bearer token:',
+        validate: function(value) {
+          if (value.length) {
+            return true;
+          } else {
+            return 'Please enter your Spotify bearer token. To get your bearer token, open this link : https://developer.spotify.com/console/post-playlists/';
+          }
+        }
+      }
+   ]).then(function(answers) {
          var answer = JSON.stringify(answers);
          config.set(answers);
          resolve(true);
@@ -36,49 +72,21 @@ function auth() {
 
 const spotiflake = async function spotiflake(inputs, flags) {
 
-   // "Young Thug"
-   const artistName = inputs;
-   // name of the playlist, optional parameter
-   var playlistName = flags['n'];
+   
+   const artistName = config.get('artist');
 
-   if (playlistName === undefined) {
-      playlistName = `${artistName}: spotiflake`;
-   }
-
-   if (artistName === undefined) {
-      spinner.fail('Failed');
-      console.log(chalk.red(`
-	Oops! Remember to add an artist name!
-
-	Example
-		spotiflake "Kendrick Lamar"
-		`))
-      return
-   }
-
-   // empty string
-   if (artistName.trim() === "") {
-      spinner.fail('Failed');
-      config.clear();
-      console.log(chalk.red(`
-	Oops! Artist name can't be empty. Please provide an artist name!
-		`))
-      return
-   }
-
-   // ora loading spinner
-   spinner.start();
-
+   let playlistName = `${artistName}: SpotiFlake`;
+    
+   status.start();
    var allTracks = [];
    var artists = [];
    var relatedTracks = []
 
-   // get artist URI
-   let token = config.get('bearer')
+   let token = config.get('password')
    // const artistSearch = await 
    spotifyApi.searchArtists(artistName, token).then(res => {
          if (res.artists.items[0] === undefined) {
-            spinner.fail('Failed');
+            status.fail('Failed');
             config.clear();
             console.log(chalk.red(`
 	
@@ -108,9 +116,8 @@ const spotiflake = async function spotiflake(inputs, flags) {
 
             })
          })
-      })
-      .catch(async err => {
-         spinner.fail('Failed');
+      }).catch(async err => {
+         status.fail('Failed');
          config.clear();
          console.log(chalk.red(`
 ERROR: Incorrect username or bearer token
@@ -119,29 +126,32 @@ You might need to update your bearer token
 
 Generate a new one at https://developer.spotify.com/console/post-playlists/
 
-Try again!
-$ spotiflake "artist_name"`));
+Try again!`));
          process.exit()
+	})
 
-      });
-   // console.log(artistSearch.data)
+        // console.log(artistSearch.data)
    var timeout = setInterval(function() {
       if (relatedTracks.length !== 0 && allTracks.length !== 0) {
          const tracks = allTracks.concat(relatedTracks)
          clearInterval(timeout);
          // call playlist gen function using allTracks
          spotifyApi.createPlaylist(playlistName, token).then(res => spotifyApi.populatePlaylist(res.id, tracks, token).then(res => {
-            spinner.succeed('Success!');
+            status.succeed('Success!');
             console.log(chalk.green(`
 Your playlist is ready! 
 It's called "${playlistName}"`));
+ 	 config.clear();
+
          }))
       }
    }, 400);
 
-}
+	
+  };
 
-spinner.stop(); // like return
+status.stop(); // like return
+
 
 const cli = meow(chalk.cyan(`
     Usage
@@ -165,15 +175,11 @@ const cli = meow(chalk.cyan(`
    }
 });
 
-updateNotifier({
-   pkg
-}).notify();
-
 (async () => {
+   if (config.get('username') === undefined || config.get('password') === undefined) {
+           let authorization = await auth();
 
-   if (config.get('username') === undefined || config.get('bearer') === undefined) {
-      let authorization = await auth();
    }
-   spotiflake(cli.input[0], cli.flags);
+   spotiflake(config.get('password'), cli.flags);
 
-})()
+})();
