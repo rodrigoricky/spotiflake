@@ -1,28 +1,55 @@
 'use strict';
-const chalk = require('chalk');
-const clear = require('clear');
-const figlet = require('figlet');
-const files = require('./lib/files');
-const inquirer  = require('inquirer');
-const CLI = require('clui');
-const Spinner = CLI.Spinner;
-const ora = require('ora');
-const status = ora('Loading ...');
-const spotifyApi = require('./lib/spotify.js')
-const pkg = require('./package.json');
-const meow = require('meow');
 
-const Conf = require('conf');
-const config = new Conf();
+// ———————— Import Packages
+const chalk      = require('chalk');
+const clear      = require('clear');
+const figlet     = require('figlet');
+const inquirer   = require('inquirer');
+const CLI        = require('clui');
+const Spinner    = CLI.Spinner;
+const ora        = require('ora');
+const meow       = require('meow');
+const Conf       = require('conf');
+const {Signale}  = require('signale');
+const os 	 = require('os')
+const fs 	 = require('fs')
+
+// ———————— Package Configurations
+const status     = ora('Loading ...');
+const config     = new Conf();
+
+const options    = { disabled: false, interactive: false, logLevel: 'info', scope: 'Information', secrets: [], stream: process.stdout, types: { information: { color: 'yellow', label: 'Welcome!', logLevel: 'info' }}};
+const custom     = new Signale(options);
+const fileName   = 'Spotiflake';
+
+// ———————— Import Sub-Files
+const spotifyApi = require('./lib/spotify.js')
+const pkg        = require('./package.json');
+const files      = require('./lib/files');
 
 clear();
 
-console.log(
-  chalk.yellow(
-    figlet.textSync('Spotiflake', { horizontalLayout: 'full' })
-  )
-);
+// ——  Main App UI Design
+console.log(chalk.yellow( figlet.textSync(fileName, { horizontalLayout: 'full' })) + '');
+console.log(chalk.white(' ———————————————————————————————————————————————————————————————— ') + '\n');
+custom.information(`Thank you for using Spotiflake! Created by Ricky Rodrigo\n`); 
+console.log('OS default directory for temp files : ' + os.homedir());
+const path = './file.txt'
 
+fs.access(path, fs.F_OK, (err) => {
+  if (err) {
+    console.log('lol')
+    return
+  }
+
+  //file exists
+})
+
+
+
+
+
+/*
 function auth() {
    return new Promise((resolve, reject) => {
     inquirer.prompt([
@@ -140,7 +167,10 @@ Try again!`));
             status.succeed('Success!');
             console.log(chalk.green(`
 Your playlist is ready! 
-It's called "${playlistName}"`));
+It's called "${playlistName}"
+
+
+Created by Ricky Rodrigo`));
  	 config.clear();
 
          }))
@@ -183,3 +213,4 @@ const cli = meow(chalk.cyan(`
    spotiflake(config.get('password'), cli.flags);
 
 })();
+*/
