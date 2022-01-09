@@ -18,7 +18,7 @@ const fs 	 = require('fs')
 const status     = ora('Loading ...');
 const config     = new Conf();
 
-const options    = { disabled: false, interactive: false, logLevel: 'info', scope: 'Information', secrets: [], stream: process.stdout, types: { information: { color: 'yellow', label: 'Welcome!', logLevel: 'info' }}};
+const options    = { disabled: false, interactive: false, logLevel: 'info', scope: 'Info', secrets: [], stream: process.stdout, types: { information: { color: 'yellow', label: 'Welcome!', logLevel: 'info' }, welcome: { color: 'blue', label: 'New User!', logLevel: 'info' }}};
 const custom     = new Signale(options);
 const fileName   = 'Spotiflake';
 
@@ -33,17 +33,25 @@ clear();
 console.log(chalk.yellow( figlet.textSync(fileName, { horizontalLayout: 'full' })) + '');
 console.log(chalk.white(' ———————————————————————————————————————————————————————————————— ') + '\n');
 custom.information(`Thank you for using Spotiflake! Created by Ricky Rodrigo\n`); 
-console.log('OS default directory for temp files : ' + os.homedir());
-const path = './file.txt'
+const path = './db.json'
 
 fs.access(path, fs.F_OK, (err) => {
   if (err) {
-    console.log('lol')
+    custom.welcome('Seems like you are a new user, follow the instructions below to get started!\n')
+    console.log(chalk.red('* ') + chalk.red.bold.underline('Instructions'))
+    console.log(`\n• Head over to ${chalk.underline.white('www.spotify.com/account/overview/')} —— and copy the value for "Username" (e.g hn4y1tz77fh166ixwgenxbimj)\n\n• And, head over to ${chalk.underline.white('https://developer.spotify.com/console/post-playlists/')} and find the OAuth Token button.\n\n• `)
+    const homedir = require('os').homedir();
+
+    console.log(homedir)
     return
   }
-
+  console.log('loAl')
   //file exists
 })
+
+
+
+
 
 
 
