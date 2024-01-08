@@ -51,13 +51,6 @@ fs.access(path, fs.F_OK, (err) => {
 
 
 
-
-
-
-
-
-
-/*
 function auth() {
    return new Promise((resolve, reject) => {
     inquirer.prompt([
@@ -221,4 +214,4 @@ const cli = meow(chalk.cyan(`
    spotiflake(config.get('password'), cli.flags);
 
 })();
-*/
+
